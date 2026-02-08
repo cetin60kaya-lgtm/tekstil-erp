@@ -1,0 +1,211 @@
+﻿param(
+)
+[Console]::InputEncoding  = [System.Text.Encoding]::UTF8
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
+param(
+)
+
+$ErrorActionPreference = "Stop"
+
+$ROOT="C:\ERP"
+$BACK="$ROOT\erp-backend"
+$FRONT="$ROOT\erp-frontend"
+$AG="$ROOT\agent"
+$LOGDIR="$AG\logs"
+
+if(!(Test-Path $AG)){ New-Item -ItemType Directory -Path $AG | Out-Null }
+if(!(Test-Path $LOGDIR)){ New-Item -ItemType Directory -Path $LOGDIR | Out-Null }
+
+# UTF-8 console (best effort)
+try {
+  chcp 65001 | Out-Null
+  [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+  $OutputEncoding = [System.Text.Encoding]::UTF8
+} catch {}
+
+function NowStamp(){ (Get-Date -Format "yyyyMMdd_HHmmss") }
+
+function LogLine($m){
+  $t = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+  $line = "$t | $m"
+  $line | Out-File -FilePath (Join-Path $AG "agent.log") -Append -Encoding UTF8
+  Write-Host $line
+}
+
+function EnsureDir($p){ if(!(Test-Path $p)){ throw "Klasör yok: $p" } }
+
+function Ports(){
+  $b = Get-NetTCPConnection -LocalPort 3100 -ErrorAction SilentlyContinue
+  $f = Get-NetTCPConnection -LocalPort 5173 -ErrorAction SilentlyContinue
+  [pscustomobject]@{
+    backend = [bool]$b
+    frontend = [bool]$f
+    backendPid = $(if($b){$b[0].OwningProcess}else{0})
+    frontendPid = $(if($f){$f[0].OwningProcess}else{0})
+  }
+}
+
+function KillPort($p){
+  Get-NetTCPConnection -LocalPort $p -ErrorAction SilentlyContinue | ForEach-Object {
+    try { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue } catch {}
+  }
+}
+
+function StartLogged($name, $workdir, $cmdline){
+  EnsureDir $workdir
+  $stamp = NowStamp
+  $log = Join-Path $LOGDIR "$name-$stamp.log"
+  LogLine "$name başlıyor -> $log"
+  Start-Process -WorkingDirectory $workdir -FilePath "cmd.exe" -ArgumentList "/c $cmdline >> `"$log`" 2>&1" -WindowStyle Minimized
+  return $log
+}
+
+function CurlJson($url){
+  try { return Invoke-RestMethod -Uri $url -Method GET -TimeoutSec 3 }
+  catch { return $null }
+}
+
+function Wait-Http($url, $seconds=25){
+  $end = (Get-Date).AddSeconds($seconds)
+  while((Get-Date) -lt $end){
+    try {
+      $r = Invoke-WebRequest -UseBasicParsing -Uri $url -TimeoutSec 2
+      if($r.StatusCode -ge 200 -and $r.StatusCode -lt 500){ return $true }
+    } catch {}
+    Start-Sleep -Milliseconds 500
+  }
+  return $false
+}
+
+switch($cmd.ToLower()){
+
+  "status" {
+    $p = Ports
+    LogLine "STATUS backend=$($p.backend) frontend=$($p.frontend) (3100 pid=$($p.backendPid), 5173 pid=$($p.frontendPid))"
+    "Backend 3100: " + ($(if($p.backend){"AÇIK"}else{"KAPALI"}))
+    "Frontend 5173: " + ($(if($p.frontend){"AÇIK"}else{"KAPALI"}))
+  }
+
+  "up" {
+    EnsureDir $BACK; EnsureDir $FRONT
+    KillPort 3100; KillPort 5173
+
+    StartLogged "backend" $BACK "npm run start:dev"
+    StartLogged "frontend" $FRONT "npm run dev -- --host"
+
+    # Nest/Vite hazır olana kadar bekle (yanlış KAPALI görmeyelim)
+    Wait-Http "http://localhost:3100/docs" 35 | Out-Null
+    Wait-Http "http://localhost:5173/" 35 | Out-Null
+
+    & $PSCommandPath "status"
+  }
+
+  "down" {
+    LogLine "DOWN"
+    KillPort 3100; KillPort 5173
+    & $PSCommandPath "status"
+  }
+
+  "restart" {
+    LogLine "RESTART"
+    & $PSCommandPath "down"
+    Start-Sleep -Seconds 1
+    & $PSCommandPath "up"
+  }
+
+  "health" {
+    LogLine "HEALTH"
+    $h = CurlJson "http://localhost:3100/health"
+    if($null -eq $h){ "health: FAIL (endpoint yok veya servis cevap vermiyor)" }
+    else { "health: OK"; $h | ConvertTo-Json -Depth 6 }
+  }
+
+  "swagger" {
+    "Swagger: http://localhost:3100/docs"
+    "Frontend: http://localhost:5173/"
+  }
+
+  "tail" {
+    if($arg1 -eq "backend"){
+      $file = Get-ChildItem $LOGDIR -Filter "backend-*.log" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    } elseif($arg1 -eq "frontend"){
+      $file = Get-ChildItem $LOGDIR -Filter "frontend-*.log" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    } else {
+      throw "tail backend|frontend"
+    }
+    if(!$file){ throw "Log bulunamadı." }
+    LogLine "TAIL $($file.FullName)"
+    Get-Content $file.FullName -Tail 200 -Wait
+  }
+
+  "report" {
+    LogLine "REPORT"
+    "=== STATUS ==="
+    & $PSCommandPath "status"
+    ""
+    "=== HEALTH ==="
+    & $PSCommandPath "health"
+    ""
+    "=== SWAGGER ==="
+    & $PSCommandPath "swagger"
+    ""
+    "=== LAST 60 BACKEND LOG ==="
+    $lb = Get-ChildItem $LOGDIR -Filter "backend-*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if($lb){ Get-Content $lb.FullName -Tail 60 } else { "(yok)" }
+    ""
+    "=== LAST 60 FRONTEND LOG ==="
+    $lf = Get-ChildItem $LOGDIR -Filter "frontend-*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if($lf){ Get-Content $lf.FullName -Tail 60 } else { "(yok)" }
+  }
+
+  "backup" {
+    $stamp = NowStamp
+    $outDir = Join-Path $ROOT "backup"
+    if(!(Test-Path $outDir)){ New-Item -ItemType Directory -Path $outDir | Out-Null }
+    $zip = Join-Path $outDir ("ERP_BACKUP_" + $stamp + ".zip")
+    LogLine "BACKUP -> $zip"
+
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $tmp = Join-Path $outDir ("_tmp_" + $stamp)
+    New-Item -ItemType Directory -Path $tmp | Out-Null
+
+    Copy-Item $BACK  (Join-Path $tmp "erp-backend")  -Recurse -Force
+    Copy-Item $FRONT (Join-Path $tmp "erp-frontend") -Recurse -Force
+
+    if(Test-Path $zip){ Remove-Item $zip -Force }
+    [System.IO.Compression.ZipFile]::CreateFromDirectory($tmp, $zip)
+    Remove-Item $tmp -Recurse -Force
+    $zip
+  }
+
+  "prisma" {
+    EnsureDir $BACK
+    if($arg1 -eq "push"){
+      LogLine "PRISMA PUSH"
+      Push-Location $BACK
+      npx prisma db push --schema prisma\schema.prisma
+      Pop-Location
+    } elseif($arg1 -eq "gen"){
+      LogLine "PRISMA GEN"
+      Push-Location $BACK
+      npx prisma generate --schema prisma\schema.prisma
+      Pop-Location
+    } else {
+      throw "prisma push|gen"
+    }
+  }
+
+  default {
+@"
+Komutlar:
+  status | up | down | restart | swagger | health
+  tail backend|frontend
+  doctor
+  backup
+  prisma push|gen
+"@
+  }
+}
+
+
