@@ -35,3 +35,8 @@ erp-backend/temiz/
 npm-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# local-only
+.vscode/
+_DISABLED_erp-web/
+
