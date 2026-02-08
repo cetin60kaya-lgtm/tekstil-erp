@@ -1,14 +1,116 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Musteri {
+  id            Int        @id @default(autoincrement())
+  ad            String
+  vergiNo       String?    @db.VarChar(20)
+  vergiDairesi  String?
+  telefon       String?    @db.VarChar(30)
+  email         String?
+  adres         String?
+  olusturmaTarihi DateTime @default(now())
+  guncellemeTarihi DateTime @updatedAt
+
+  faturalar     Fatura[]
+  tahsilatlar   Tahsilat[]
+  cekSenetler   CekSenet[]
+}
+
+model Tedarikci {
+  id              Int        @id @default(autoincrement())
+  ad              String
+  vergiNo         String?    @db.VarChar(20)
+  vergiDairesi    String?
+  telefon         String?    @db.VarChar(30)
+  email           String?
+  adres           String?
+  olusturmaTarihi DateTime   @default(now())
+  guncellemeTarihi DateTime  @updatedAt
+
+  faturalar       Fatura[]
+  cekSenetler     CekSenet[]
+}
+
+model Fatura {
+  id              Int        @id @default(autoincrement())
+  numara          String     @unique
+  tarih           DateTime
+  vadeTarihi      DateTime?
+  toplamTutar     Decimal    @db.Decimal(15, 2)
+  kdvToplam       Decimal    @db.Decimal(15, 2)
+  netTutar        Decimal    @db.Decimal(15, 2)
+  aciklama        String?
+  olusturmaTarihi DateTime   @default(now())
+  guncellemeTarihi DateTime  @updatedAt
+
+  musteriId       Int?
+  tedarikciId     Int?
+
+  musteri         Musteri?   @relation(fields: [musteriId], references: [id])
+  tedarikci       Tedarikci? @relation(fields: [tedarikciId], references: [id])
+
+  kalemler        FaturaKalem[]
+  kdvHareketleri  KDVHareket[]
+  tahsilatlar     Tahsilat[]
+}
+
+model FaturaKalem {
+  id           Int      @id @default(autoincrement())
+  faturaId     Int
+  aciklama     String
+  miktar       Decimal  @db.Decimal(15, 3)
+  birimFiyat   Decimal  @db.Decimal(15, 2)
+  kdvOrani     Decimal  @db.Decimal(5, 2)
+  kdvTutari    Decimal  @db.Decimal(15, 2)
+  tutar        Decimal  @db.Decimal(15, 2)
+
+  fatura       Fatura   @relation(fields: [faturaId], references: [id])
+}
+
+model KDVHareket {
+  id         Int      @id @default(autoincrement())
+  faturaId   Int
+  oran       Decimal  @db.Decimal(5, 2)
+  matrah     Decimal  @db.Decimal(15, 2)
+  tutar      Decimal  @db.Decimal(15, 2)
+
+  fatura     Fatura   @relation(fields: [faturaId], references: [id])
+}
+
+model Tahsilat {
+  id              Int        @id @default(autoincrement())
+  faturaId        Int?
+  musteriId       Int
+  tutar           Decimal    @db.Decimal(15, 2)
+  tarih           DateTime
+  odemeYontemi    String
+  aciklama        String?
+  olusturmaTarihi DateTime   @default(now())
+
+  fatura          Fatura?    @relation(fields: [faturaId], references: [id])
+  musteri         Musteri    @relation(fields: [musteriId], references: [id])
+  cekSenetler     CekSenet[]
+}
+
+model CekSenet {
+  id           Int        @id @default(autoincrement())
+  tip          String
+  numara       String     @unique
+  vadeTarihi   DateTime
+  tutar        Decimal    @db.Decimal(15, 2)
+  durum        String
+  tahsilatId   Int?
+  musteriId    Int?
+  tedarikciId  Int?
+
+  tahsilat     Tahsilat?  @relation(fields: [tahsilatId], references: [id])
+  musteri      Musteri?   @relation(fields: [musteriId], references: [id])
+  tedarikci    Tedarikci? @relation(fields: [tedarikciId], references: [id])
 }
