@@ -1,0 +1,8 @@
+﻿{
+    "commands":  [
+                     "cd C:\\ERP\\erp-backend",
+                     "npm run start:dev",
+                     "cd C:\\ERP\\erp-frontend",
+                     "npm run dev -- --host"
+                 ]
+}

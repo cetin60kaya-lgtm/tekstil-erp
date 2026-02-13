@@ -1,0 +1,26 @@
+{
+  "name": "erp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npm run front:dev",
+    "build": "npm run front:build",
+    "preview": "npm run front:preview",
+    "front:dev": "npm --prefix erp-frontend run dev",
+    "front:build": "npm --prefix erp-frontend run build",
+    "front:preview": "npm --prefix erp-frontend run preview",
+    "web:dev": "npm --prefix erp-web run dev",
+    "web:build": "npm --prefix erp-web run build",
+    "web:preview": "npm --prefix erp-web run preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@prisma/client": "^7.2.0",
+    "prisma": "^7.2.0"
+  }
+}

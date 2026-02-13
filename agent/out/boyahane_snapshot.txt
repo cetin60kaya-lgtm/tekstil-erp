@@ -1,0 +1,66 @@
+﻿=== FRONTEND: Boyahane dosyalari ===
+
+`n=== FRONTEND: BoyahaneAPI kullanim yerleri ===
+C:\ERP\erp-frontend\src\lib\api.js:16: export const BoyahaneAPI = {
+C:\ERP\erp-frontend\src\App.jsx:2: import { BoyahaneAPI } from "./lib/api";
+C:\ERP\erp-frontend\src\App.jsx:47:       const data = await BoyahaneAPI.list({ aktif, boyaTuru, tip, q, limit: 300 });
+C:\ERP\erp-frontend\src\App.jsx:65:       await BoyahaneAPI.create({
+C:\ERP\erp-frontend\src\App.jsx:94:       await BoyahaneAPI.update(editing.id, {
+C:\ERP\erp-frontend\src\App.jsx:111:       await BoyahaneAPI.clone(item.id);
+C:\ERP\erp-frontend\src\App.jsx:124:       await BoyahaneAPI.update(item.id, { aktif: item.aktif ? "false" : "true" });
+C:\ERP\erp-frontend\src\App.jsx:150:       await BoyahaneAPI.update(quick.id, { hexRenk: v });
+
+`n=== BACKEND: boyahane gecen dosyalar ===
+C:\ERP\erp-backend\src\boyahane\dto\create-boyahane-renk.dto.ts:8: export class CreateBoyahaneRenkDto {
+C:\ERP\erp-backend\src\boyahane\dto\update-boyahane-renk.dto.ts:2: import { RenkTipiDto } from "./create-boyahane-renk.dto";
+C:\ERP\erp-backend\src\boyahane\dto\update-boyahane-renk.dto.ts:4: export class UpdateBoyahaneRenkDto {
+C:\ERP\erp-backend\src\boyahane\model-renk\model-renk.controller.ts:5: @Controller("boyahane/model-renk")
+C:\ERP\erp-backend\src\boyahane\model-renk\model-renk.service.ts:13:     const rows = await this.prisma.boyahaneModelRenk.findMany({
+C:\ERP\erp-backend\src\boyahane\model-renk\model-renk.service.ts:19:     const renkler = await this.prisma.boyahaneRenk.findMany({
+C:\ERP\erp-backend\src\boyahane\model-renk\model-renk.service.ts:31:     const renk = await this.prisma.boyahaneRenk.findUnique({ where: { id: dto.renkId } });
+C:\ERP\erp-backend\src\boyahane\model-renk\model-renk.service.ts:35:       return await this.prisma.boyahaneModelRenk.create({
+C:\ERP\erp-backend\src\boyahane\model-renk\model-renk.service.ts:44:     return this.prisma.boyahaneModelRenk.delete({ where: { id } });
+C:\ERP\erp-backend\src\boyahane\boyahane.controller.ts:2: import { BoyahaneService } from "./boyahane.service";
+C:\ERP\erp-backend\src\boyahane\boyahane.controller.ts:3: import { CreateBoyahaneRenkDto } from "./dto/create-boyahane-renk.dto";
+C:\ERP\erp-backend\src\boyahane\boyahane.controller.ts:4: import { UpdateBoyahaneRenkDto } from "./dto/update-boyahane-renk.dto";
+C:\ERP\erp-backend\src\boyahane\boyahane.controller.ts:6: @Controller("boyahane/renk")
+C:\ERP\erp-backend\src\boyahane\boyahane.controller.ts:7: export class BoyahaneController {
+C:\ERP\erp-backend\src\boyahane\boyahane.controller.ts:8:   constructor(private readonly service: BoyahaneService) {}
+C:\ERP\erp-backend\src\boyahane\boyahane.controller.ts:10:   // GET /boyahane/renk?aktif=true&boyaTuru=Pigment&tip=PANTONE&q=18-1663&limit=200
+C:\ERP\erp-backend\src\boyahane\boyahane.controller.ts:29:   create(@Body() dto: CreateBoyahaneRenkDto) {
+C:\ERP\erp-backend\src\boyahane\boyahane.controller.ts:34:   update(@Param("id", ParseIntPipe) id: number, @Body() dto: UpdateBoyahaneRenkDto) {
+C:\ERP\erp-backend\src\boyahane\boyahane.module.ts:3: import { BoyahaneController } from "./boyahane.controller";
+C:\ERP\erp-backend\src\boyahane\boyahane.module.ts:4: import { BoyahaneService } from "./boyahane.service";
+C:\ERP\erp-backend\src\boyahane\boyahane.module.ts:7:   controllers: [BoyahaneController],
+C:\ERP\erp-backend\src\boyahane\boyahane.module.ts:8:   providers: [BoyahaneService, PrismaService],
+C:\ERP\erp-backend\src\boyahane\boyahane.module.ts:10: export class BoyahaneModule {}
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:3: import { CreateBoyahaneRenkDto } from "./dto/create-boyahane-renk.dto";
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:4: import { UpdateBoyahaneRenkDto } from "./dto/update-boyahane-renk.dto";
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:42: export class BoyahaneService {
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:82:     const rows = await this.prisma.boyahaneRenk.findMany({
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:101:   async create(dto: CreateBoyahaneRenkDto) {
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:109:       return await this.prisma.boyahaneRenk.create({
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:126:   async update(id: number, dto: UpdateBoyahaneRenkDto) {
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:127:     const row: any = await this.prisma.boyahaneRenk.findUnique({ where: { id } });
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:144:       return await this.prisma.boyahaneRenk.update({
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:161:     const row: any = await this.prisma.boyahaneRenk.findUnique({ where: { id } });
+C:\ERP\erp-backend\src\boyahane\boyahane.service.ts:168:       return await this.prisma.boyahaneRenk.create({
+C:\ERP\erp-backend\src\app.module.ts:21: import { BoyahaneModule } from './boyahane/boyahane.module';
+C:\ERP\erp-backend\src\app.module.ts:23: import { ModelRenkModule } from "./boyahane/model-renk/model-renk.module";
+C:\ERP\erp-backend\src\app.module.ts:30:     KalipKartModule,BoyahaneModule, 
+C:\ERP\erp-backend\src\app.module.ts:39:    BoyahaneModule,
+
+`n=== BACKEND: /boyahane/renk test ===
+ERROR: Uzak sunucuya bağlanılamıyor
+`n=== PRISMA: boyahane/pantone/renk modelleri ===
+C:\ERP\erp-backend\prisma\schema.prisma:136: model boyahaneRenk {
+C:\ERP\erp-backend\prisma\schema.prisma:138:   pantone   String
+C:\ERP\erp-backend\prisma\schema.prisma:140:   boyaTuru  String
+C:\ERP\erp-backend\prisma\schema.prisma:141:   hexRenk   String
+C:\ERP\erp-backend\prisma\schema.prisma:142:   isNumune  Boolean  @default(false)
+C:\ERP\erp-backend\prisma\schema.prisma:143:   isImalat  Boolean  @default(false)
+C:\ERP\erp-backend\prisma\schema.prisma:153: model boyahaneModelRenk {
+C:\ERP\erp-backend\prisma\schema.prisma:433: model boya_renk {
+C:\ERP\erp-backend\prisma\schema.prisma:435:   pantone            String               @unique
+C:\ERP\erp-backend\prisma\schema.prisma:442: model boya_renk_versiyon {
+

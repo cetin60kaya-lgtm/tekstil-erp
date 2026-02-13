@@ -1,0 +1,15 @@
+﻿JOBFILE: C:\ERP\agent\jobs\job_101_boyahane_snapshot.job.json
+WHEN: 2026-01-27T01:31:58
+MESSAGE: Komut exitCode=1: cmd /c 'cd /d C:\ERP\erp-frontend ^&^& findstr /S /I /N BoyahaneAPI src\*.js src\*.jsx src\*.ts src\*.tsx' | Out-String | Add-Content C:\ERP\agent\out\boyahane_snapshot.txt -Encoding UTF8
+
+Komut exitCode=1: cmd /c 'cd /d C:\ERP\erp-frontend ^&^& findstr /S /I /N BoyahaneAPI src\*.js src\*.jsx src\*.ts src\*
+.tsx' | Out-String | Add-Content C:\ERP\agent\out\boyahane_snapshot.txt -Encoding UTF8
+At C:\ERP\agent\service.ps1:93 char:15
++               throw "Komut exitCode=$($p.ExitCode): $cmd"
++               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Komut exitCode=... -Encoding UTF8:String) [], RuntimeException
+    + FullyQualifiedErrorId : Komut exitCode=1: cmd /c 'cd /d C:\ERP\erp-frontend ^&^& findstr /S /I /N BoyahaneAPI sr 
+   c\*.js src\*.jsx src\*.ts src\*.tsx' | Out-String | Add-Content C:\ERP\agent\out\boyahane_snapshot.txt -Encoding U  
+  TF8
+ 
+

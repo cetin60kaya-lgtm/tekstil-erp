@@ -1,0 +1,42 @@
+node_modules
+# Keep environment variables out of version control
+.env
+
+/generated/prisma
+
+# Python virtual environments and caches
+.venv/
+**/.venv/
+__pycache__/
+
+# Build and coverage outputs
+dist/
+build/
+coverage/
+
+# OS-specific noise
+Thumbs.db
+desktop.ini
+
+# ERP large/generated outputs
+_bundle/
+_export/
+_MAP/
+_OUT/
+_TMP_CLEAN/
+backup/
+agent/logs/
+agent/reports/
+erp-backend/__QUARANTINE__*/
+erp-backend/__ARCHIVE__*/
+erp-backend/temiz/
+
+# Package manager logs
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local-only
+.vscode/
+_DISABLED_erp-web/
+
