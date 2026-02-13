@@ -1,0 +1,56 @@
+﻿body {
+  margin: 0;
+  padding: 12px;
+  font-family: system-ui, Arial, sans-serif;
+}
+
+.wrap h2 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+}
+
+.card {
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+label {
+  width: 60px;
+  opacity: 0.8;
+}
+
+input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 8px;
+  border-radius: 12px;
+  border: 1px solid #bbb;
+  background: #f6f6f6;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #efefef;
+}
+
+.log {
+  margin-top: 10px;
+  font-size: 12px;
+  opacity: 0.85;
+  white-space: pre-wrap;
+}

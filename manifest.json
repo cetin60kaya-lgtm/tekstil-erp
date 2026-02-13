@@ -1,0 +1,24 @@
+﻿{
+  "manifestVersion": 5,
+  "id": "com.erp.ps.testplugin",
+  "name": "ERP Test Plugin",
+  "version": "0.0.1",
+  "main": "main.js",
+  "uiEntryPoints": [
+    {
+      "type": "panel",
+      "id": "erpTestPanel",
+      "label": "ERP Test",
+      "minimumSize": { "width": 320, "height": 220 },
+      "preferredDockedSize": { "width": 360, "height": 260 }
+    }
+  ],
+  "host": {
+    "app": "PS",
+    "minVersion": "22.0.0"
+  },
+  "requiredPermissions": {
+    "localFileSystem": "none",
+    "network": "none"
+  }
+}
