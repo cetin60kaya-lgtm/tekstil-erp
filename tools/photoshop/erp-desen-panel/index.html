@@ -4,13 +4,20 @@
     <meta charset="utf-8" />
     <style>
       body{font-family:system-ui; padding:12px;}
-      button{width:100%; padding:10px; border-radius:12px;}
-      #log{margin-top:12px; border:1px solid #999; border-radius:12px; padding:10px; min-height:120px; white-space:pre-wrap;}
+      label{display:block; margin:10px 0 6px;}
+      input{width:100%; padding:10px; border-radius:12px; border:1px solid #666; background:#222; color:#fff;}
+      button{width:100%; padding:12px; border-radius:12px; margin-top:12px;}
+      #log{margin-top:12px; border:1px solid #666; border-radius:12px; padding:10px; min-height:140px; white-space:pre-wrap; background:#111; color:#ddd;}
     </style>
   </head>
   <body>
-    <h3>ERP Desen Panel (PS 27.0 TEST)</h3>
-    <button id="btnRun">TEST: Alert + Text Layer</button>
+    <h3>ERP Desen Panel</h3>
+
+    <label>Kanal Adı (örn: 18-1663 – Kırmızı)</label>
+    <input id="chName" value="18-1663 – Kırmızı" />
+
+    <button id="btnRun">SPOT OLUŞTUR + AD VER</button>
+
     <div id="log">BOOT bekleniyor...</div>
 
     <script src="./main.js"></script>
