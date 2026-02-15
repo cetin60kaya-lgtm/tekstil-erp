@@ -195,3 +195,32 @@
     });
   });
 })();
+async function createRealSpot(name, hex){
+  const raw = hex.replace("#","");
+  const r = parseInt(raw.slice(0,2),16);
+  const g = parseInt(raw.slice(2,4),16);
+  const b = parseInt(raw.slice(4,6),16);
+
+  await action.batchPlay([
+    {
+      _obj: "make",
+      new: { _class: "channel" },
+      at: { _ref: "channel", _enum: "channel", _value: "mask" },
+      using: {
+        _obj: "channel",
+        name: name,
+        color: {
+          _obj: "RGBColor",
+          red: r,
+          green: g,
+          blue: b
+        },
+        opacity: 100,
+        kind: {
+          _enum: "channelType",
+          _value: "spotColorChannel"
+        }
+      }
+    }
+  ], { synchronousExecution:true, modalBehavior:"execute" });
+}
