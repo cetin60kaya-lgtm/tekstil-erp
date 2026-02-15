@@ -1,0 +1,36 @@
+﻿<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <h2>ERP Desen Panel</h2>
+
+    <div class="card">
+      <div class="row">
+        <label>Metin</label>
+        <input id="txt" type="text" value="AKS: AKS-0001  |  Tarih: 2026-01-30" />
+      </div>
+
+      <button id="btnAddText">Test 1: Text Layer Ekle</button>
+      <button id="btnRename">Test 2: Aktif Layer Adını Değiştir</button>
+
+      <hr />
+
+      <div class="row">
+        <label>Kanal Adı</label>
+        <input id="chName" type="text" value="ERP_SPOT_01 - 18-1663 Kırmızı" />
+      </div>
+      <button id="btnSpot">Test 3: Kanal Oluştur (Alpha/Spot Test)</button>
+
+      <div class="small">
+        Not: Bu test “kanal oluşturma” altyapısını doğrular. Bir sonraki adımda bunu gerçek Spot Channel + renk atama + isim standardına yükselteceğiz.
+      </div>
+
+      <div id="log" class="log"></div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

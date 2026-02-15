@@ -1,0 +1,12 @@
+﻿:root { --pad: 12px; }
+body { margin:0; padding: var(--pad); font-family: system-ui, Arial, sans-serif; }
+h2 { margin: 0 0 10px 0; font-size: 16px; }
+.card { border: 1px solid #ddd; border-radius: 14px; padding: 12px; }
+.row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
+label { width: 72px; opacity: .85; }
+input { flex:1; padding: 9px 10px; border-radius: 12px; border: 1px solid #ccc; }
+button { width: 100%; padding: 10px; margin-top: 8px; border-radius: 14px; border: 1px solid #bbb; background:#f6f6f6; cursor:pointer; }
+button:hover { background:#efefef; }
+.small { font-size: 12px; opacity: .85; margin-top: 10px; }
+.log { margin-top: 10px; font-size: 12px; opacity: .9; white-space: pre-wrap; border-top: 1px dashed #ddd; padding-top: 10px; }
+hr { border: none; border-top: 1px solid #eee; margin: 12px 0; }
