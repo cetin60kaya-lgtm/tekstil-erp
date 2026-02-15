@@ -1,10 +1,14 @@
 ﻿{
-  "manifestVersion": 5,
   "id": "com.erp.desen.panel",
   "name": "ERP Desen Panel",
   "version": "0.1.0",
-  "main": "main.js",
-  "uiEntryPoints": [
+  "main": "index.html",
+  "manifestVersion": 5,
+  "host": {
+    "app": "PS",
+    "minVersion": "23.3.0"
+  },
+  "entrypoints": [
     {
       "type": "panel",
       "id": "erpDesenPanel",
@@ -13,6 +17,8 @@
       "preferredDockedSize": { "width": 420, "height": 420 }
     }
   ],
-  "host": { "app": "PS", "minVersion": "22.0.0" },
-  "requiredPermissions": { "localFileSystem": "none", "network": "none" }
+  "requiredPermissions": {
+    "network": { "domains": [] },
+    "localFileSystem": "none"
+  }
 }
