@@ -29,7 +29,7 @@
   }
 
   async function addTextLayerBatch(text){
-    // 1) make text layer
+    // make text layer
     await action.batchPlay(
       [{
         _obj: "make",
@@ -39,7 +39,7 @@
       { synchronousExecution: true, modalBehavior: "execute" }
     );
 
-    // 2) set text content + name
+    // set content + name
     await action.batchPlay(
       [{
         _obj: "set",
@@ -54,16 +54,29 @@
     );
   }
 
-  async function addAlphaChannelBatch(){
+  // ✅ GUARANTEED Alpha: Select RGB channel -> Duplicate it as a new channel (Alpha)
+  async function addAlphaByDuplicateRGB(){
     const chName = "ALPHA_PROOF_" + Date.now();
+
+    // 1) select RGB (composite) channel
     await action.batchPlay(
       [{
-        _obj: "make",
-        _target: [{ _ref: "channel" }],
-        using: { _obj: "channel", name: chName }
+        _obj: "select",
+        _target: [{ _ref: "channel", _enum: "channel", _value: "RGB" }]
       }],
       { synchronousExecution: true, modalBehavior: "execute" }
     );
+
+    // 2) duplicate selected channel -> new alpha channel named chName
+    await action.batchPlay(
+      [{
+        _obj: "duplicate",
+        _target: [{ _ref: "channel", _enum: "ordinal", _value: "targetEnum" }],
+        name: chName
+      }],
+      { synchronousExecution: true, modalBehavior: "execute" }
+    );
+
     return chName;
   }
 
@@ -74,28 +87,28 @@
     const doc = await ensureDoc();
     log("OK: activeDocument=" + doc.name);
 
-    // Alert kanıt
-    try { await core.showAlert("KANIT ✅\nBatchPlay ile Text Layer + Alpha yapılacak."); }
+    try { await core.showAlert("KANIT ✅\nText Layer + Alpha (duplicate RGB) denenecek."); }
     catch(e){ log("showAlert FAIL: " + (e?.message || e)); }
 
     await core.executeAsModal(async ()=>{
-      // Text layer (batchPlay)
+      // Text
       log("STEP: Text layer (batchPlay)...");
       await addTextLayerBatch($("txt")?.value);
+      log("OK: ERP_TEXT_PROOF oluştu (Layers)");
 
-      // Alpha channel (batchPlay)
-      log("STEP: Alpha channel (batchPlay)...");
-      const ch = await addAlphaChannelBatch();
+      // Alpha
+      log("STEP: Alpha (duplicate RGB)...");
+      const ch = await addAlphaByDuplicateRGB();
+      log("OK: Alpha oluştu -> " + ch + " (Window > Channels)");
 
-      log("DONE ✅ Layers: ERP_TEXT_PROOF | Channels: " + ch);
-    }, { commandName: "ERP Proof BatchPlay" });
+    }, { commandName: "ERP Proof: Text + Alpha (RGB duplicate)" });
 
     setStatus(true, "Bitti ✅ (Layers + Channels kontrol et)");
     try { await core.showAlert("Bitti ✅\nLayers: ERP_TEXT_PROOF\nChannels: ALPHA_PROOF_..."); } catch {}
   }
 
   function wire(){
-    log("BOOT ✅ (BatchPlay mode)");
+    log("BOOT ✅ (BatchPlay + RGB duplicate alpha)");
     setStatus(false, "Hazır (PSD açık olmalı)");
 
     $("btnRun").addEventListener("click", async ()=>{
