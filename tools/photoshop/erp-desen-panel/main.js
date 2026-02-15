@@ -17,8 +17,17 @@
     if(!app.activeDocument) throw new Error("Açık PSD yok. File > New > Create.");
   }
 
+  function hexToRgb(hex){
+    const raw = (hex||"").trim().replace(/^#/,"");
+    if(!/^[0-9a-fA-F]{6}$/.test(raw)) throw new Error("HEX geçersiz: " + hex);
+    return {
+      r: parseInt(raw.slice(0,2),16),
+      g: parseInt(raw.slice(2,4),16),
+      b: parseInt(raw.slice(4,6),16)
+    };
+  }
+
   async function addTextLayerBatch(text){
-    // make text layer
     await action.batchPlay(
       [{
         _obj: "make",
@@ -28,7 +37,6 @@
       { synchronousExecution: true, modalBehavior: "execute" }
     );
 
-    // set text + name
     await action.batchPlay(
       [{
         _obj: "set",
@@ -39,38 +47,60 @@
     );
   }
 
+  async function createSpotChannel(name, hex){
+    const rgb = hexToRgb(hex);
+
+    // 27.0 için spotColorChannel descriptor
+    await action.batchPlay(
+      [{
+        _obj: "make",
+        _target: [{ _ref: "channel" }],
+        using: {
+          _obj: "spotColorChannel",
+          name: name,
+          color: { _obj: "RGBColor", red: rgb.r, green: rgb.g, blue: rgb.b },
+          opacity: 100,
+          solidity: 100
+        }
+      }],
+      { synchronousExecution: true, modalBehavior: "execute" }
+    );
+  }
+
   async function run(){
     log("CLICK geldi ✅");
     await ensureDoc();
 
-    // Alert kanıtı
     try{
-      await core.showAlert("KANIT ✅\nButon çalıştı.\nŞimdi Text Layer eklenecek.");
+      await core.showAlert("KANIT ✅\nText Layer + Spot Channel denenecek.\nChannels panelini aç: Window > Channels");
       log("Alert OK");
     }catch(e){
       log("Alert FAIL: " + (e?.message || e));
     }
 
-    // Modal + Text layer
     await core.executeAsModal(async ()=>{
+      log("1) Text layer...");
       await addTextLayerBatch("ERP 27.0 TEST");
-    }, { commandName: "ERP Test Text Layer" });
+      log("OK: ERP_TEXT_PROOF");
 
-    log("Text Layer OK ✅ (Layers panelinde ERP_TEXT_PROOF)");
+      log("2) Spot channel...");
+      await createSpotChannel("18-1660_RED_TEST", "#FF0000");
+      log("OK: Spot -> 18-1660_RED_TEST");
+    }, { commandName: "ERP Test: Text + Spot" });
+
+    log("BİTTİ ✅  Window > Channels'ta spot'u kontrol et.");
   }
 
   document.addEventListener("DOMContentLoaded", ()=>{
-    log("BOOT OK ✅ main.js çalıştı");
+    log("BOOT OK ✅ main.js (spot) çalıştı");
     const btn = $("btnRun");
-    if(!btn){
-      log("HATA: btnRun bulunamadı (index.html eski olabilir)");
-      return;
-    }
     btn.addEventListener("click", async ()=>{
       btn.disabled = true;
       try{ await run(); }
-      catch(e){ log("HATA: " + (e?.message || e)); try{ await core.showAlert("HATA:\n"+(e?.message||e)); }catch{} }
-      finally{ btn.disabled = false; }
+      catch(e){
+        log("HATA: " + (e?.message || e));
+        try{ await core.showAlert("HATA:\n"+(e?.message||e)); }catch{}
+      }finally{ btn.disabled = false; }
     });
   });
 })();
