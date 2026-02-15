@@ -7,30 +7,17 @@
   <body>
     <h2>ERP Desen Panel</h2>
 
-    <div id="docBadge" class="badge no">Doküman: ?</div>
+    <div id="status" class="badge no">Hazır (PSD açık olmalı)</div>
 
     <div class="card">
-      <button id="btnDiag">DIAG: Photoshop API Kontrol</button>
+      <button id="btnRun">KANIT TEST: Alert + Text + Alpha</button>
 
       <div class="row" style="margin-top:10px;">
         <label>Metin</label>
-        <input id="txt" type="text" value="AKS: AKS-0001  |  Tarih: 2026-01-30" />
+        <input id="txt" type="text" value="AKS: AKS-0001 | Tarih: 2026-01-30" />
       </div>
-      <button id="btnAddText">Test: Text Layer Ekle</button>
 
-      <hr />
-
-      <div class="row">
-        <label>Spot Adı</label>
-        <input id="spotName" type="text" value="01 - 18-1663 Kırmızı" />
-      </div>
-      <div class="row">
-        <label>HEX</label>
-        <input id="spotHex" type="text" value="#C8102E" />
-      </div>
-      <button id="btnSpot">SPOT: Kanal Oluştur (Gerçek Spot)</button>
-
-      <div id="log" class="log">LOG TEST: Panel yüklendi. (Bu yazıyı görmüyorsan index.html güncellenmemiştir.)</div>
+      <div id="log" class="log">LOG: Panel yüklendi. Butona basınca Photoshop'ta alert görmen lazım.</div>
     </div>
 
     <script src="./main.js"></script>
