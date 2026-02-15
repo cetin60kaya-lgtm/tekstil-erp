@@ -9,31 +9,35 @@ function log(msg) {
   el.textContent = `${new Date().toLocaleTimeString()}  ${msg}\n` + el.textContent;
 }
 
-function setDocBadge(hasDoc) {
+function setDocBadge(hasDoc, info) {
   const b = $("docBadge");
   if (!b) return;
   b.classList.remove("ok","no");
   b.classList.add(hasDoc ? "ok" : "no");
-  b.textContent = hasDoc ? "Doküman: VAR ✅" : "Doküman: YOK (PSD aç)";
+  b.textContent = hasDoc ? `Doküman: VAR ✅  (${info})` : `Doküman: YOK (PSD aç)  (${info})`;
 }
 
 function setButtonsEnabled(enabled) {
-  const ids = ["btnAddText","btnRename","btnCh"];
-  ids.forEach(id => {
+  ["btnAddText","btnRename","btnCh","btnRefresh"].forEach(id => {
     const el = $(id);
-    if (el) el.disabled = !enabled;
+    if (el) el.disabled = !enabled && id !== "btnRefresh";
   });
 }
 
-function hasOpenDoc() {
-  try { return (app.documents && app.documents.length > 0); }
-  catch { return false; }
+function docInfo() {
+  try {
+    const n = (app.documents && app.documents.length) ? app.documents.length : 0;
+    let name = "";
+    try { name = app.activeDocument ? app.activeDocument.name : ""; } catch {}
+    return { n, name };
+  } catch {
+    return { n: 0, name: "" };
+  }
 }
 
 async function ensureDoc() {
-  if (!hasOpenDoc()) {
-    throw new Error("Açık PSD yok. Önce File > New ile bir doküman aç.");
-  }
+  const info = docInfo();
+  if (info.n <= 0) throw new Error("Açık PSD yok. File > New > Create ile doküman aç.");
 }
 
 async function addTextLayer(text) {
@@ -73,59 +77,46 @@ async function createChannelAlpha(name) {
   }, { commandName: "ERP Desen Panel: Create Channel (Alpha)" });
 }
 
-function startDocWatcher() {
-  const tick = () => {
-    const ok = hasOpenDoc();
-    setDocBadge(ok);
-    setButtonsEnabled(ok);
-  };
-  tick();
-  setInterval(tick, 600);
+function refresh() {
+  const info = docInfo();
+  const has = info.n > 0;
+  const label = `docs=${info.n}` + (info.name ? `, active="${info.name}"` : "");
+  setDocBadge(has, label);
+  setButtonsEnabled(has);
+  log("REFRESH: " + label);
 }
 
 function wireUI() {
-  // UI hazır logu — bunu görmüyorsan JS hiç çalışmıyordur
-  log("UI hazır. PSD açınca butonlar aktif olacak.");
+  log("UI hazır. Refresh ile doküman durumunu gör.");
+
+  $("btnRefresh").addEventListener("click", () => {
+    log("CLICK: Refresh");
+    refresh();
+  });
 
   $("btnAddText").addEventListener("click", async () => {
     log("CLICK: Test 1");
-    try {
-      await addTextLayer($("txt").value);
-      log("OK: ERP_TEXT eklendi.");
-    } catch (e) {
-      log("HATA: " + (e?.message || e));
-    }
+    try { await addTextLayer($("txt").value); log("OK: ERP_TEXT eklendi."); }
+    catch(e){ log("HATA: " + (e?.message || e)); }
   });
 
   $("btnRename").addEventListener("click", async () => {
     log("CLICK: Test 2");
-    try {
-      await renameActiveLayer("ERP_RENAMED_" + Date.now());
-      log("OK: Aktif layer adı değişti.");
-    } catch (e) {
-      log("HATA: " + (e?.message || e));
-    }
+    try { await renameActiveLayer("ERP_RENAMED_" + Date.now()); log("OK: Aktif layer adı değişti."); }
+    catch(e){ log("HATA: " + (e?.message || e)); }
   });
 
   $("btnCh").addEventListener("click", async () => {
     log("CLICK: Test 3");
-    try {
-      await createChannelAlpha($("chName").value);
-      log("OK: Kanal oluşturuldu (Channels panelinde gör).");
-    } catch (e) {
-      log("HATA: " + (e?.message || e));
-    }
+    try { await createChannelAlpha($("chName").value); log("OK: Kanal oluşturuldu (Channels panelinde gör)."); }
+    catch(e){ log("HATA: " + (e?.message || e)); }
   });
 
-  startDocWatcher();
+  refresh();
+  setInterval(refresh, 1200);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  try {
-    wireUI();
-  } catch (e) {
-    // En kötü ihtimal: burada bile log basalım
-    const el = document.getElementById("log");
-    if (el) el.textContent = "BOOT HATA: " + (e?.message || e);
-  }
+  try { wireUI(); }
+  catch(e){ const el = document.getElementById("log"); if(el) el.textContent = "BOOT HATA: " + (e?.message || e); }
 });

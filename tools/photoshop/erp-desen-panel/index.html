@@ -10,7 +10,9 @@
     <div id="docBadge" class="badge no">Doküman: YOK (PSD aç)</div>
 
     <div class="card">
-      <div class="row">
+      <button id="btnRefresh">Durum Yenile (Debug)</button>
+
+      <div class="row" style="margin-top:10px;">
         <label>Metin</label>
         <input id="txt" type="text" value="AKS: AKS-0001  |  Tarih: 2026-01-30" />
       </div>
@@ -25,10 +27,6 @@
         <input id="chName" type="text" value="ERP_CH_01 - 18-1663 Kırmızı" />
       </div>
       <button id="btnCh">Test 3: Kanal Oluştur (Alpha)</button>
-
-      <div class="small">
-        Eğer buton tıklanmazsa: log'a “UI hazır” yazısını ve tıklama loglarını görmen lazım.
-      </div>
 
       <div id="log" class="log"></div>
     </div>
