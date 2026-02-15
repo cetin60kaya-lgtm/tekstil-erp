@@ -1,11 +1,7 @@
-﻿(function () {
-
-  function $(id){ return document.getElementById(id); }
-  function ts(){ return new Date().toLocaleTimeString(); }
-  function log(msg){
-    const el=$("log"); if(!el) return;
-    el.textContent = `${ts()}  ${msg}\n` + el.textContent;
-  }
+﻿(function(){
+  const $ = (id)=>document.getElementById(id);
+  const ts = ()=>new Date().toLocaleTimeString();
+  const log = (m)=>{ const el=$("log"); if(el) el.textContent = `${ts()}  ${m}\n` + el.textContent; };
 
   let ps, app, core, action;
 
@@ -18,67 +14,63 @@
 
   async function ensureDoc(){
     loadPS();
-    if(!app.activeDocument) throw new Error("Açık PSD yok.");
+    if(!app.activeDocument) throw new Error("Açık PSD yok. File > New > Create.");
   }
 
-  function hexToRgb(hex){
-    hex = hex.replace("#","");
-    const r = parseInt(hex.substring(0,2),16);
-    const g = parseInt(hex.substring(2,4),16);
-    const b = parseInt(hex.substring(4,6),16);
-    return {r,g,b};
-  }
+  async function addTextLayerBatch(text){
+    // make text layer
+    await action.batchPlay(
+      [{
+        _obj: "make",
+        _target: [{ _ref: "layer" }],
+        using: { _obj: "textLayer" }
+      }],
+      { synchronousExecution: true, modalBehavior: "execute" }
+    );
 
-  async function createSpot(hex,name){
-
-    const {r,g,b} = hexToRgb(hex);
-
-    await action.batchPlay([{
-      _obj:"make",
-      _target:[{_ref:"channel"}],
-      using:{
-        _obj:"channel",
-        name:name,
-        color:{
-          _obj:"RGBColor",
-          red:r,
-          green:g,
-          blue:b
-        },
-        opacity:100,
-        kind:{
-          _enum:"channelType",
-          _value:"spotColorChannel"
-        }
-      }
-    }], {synchronousExecution:true, modalBehavior:"execute"});
-
+    // set text + name
+    await action.batchPlay(
+      [{
+        _obj: "set",
+        _target: [{ _ref: "layer", _enum: "ordinal", _value: "targetEnum" }],
+        to: { _obj: "layer", name: "ERP_TEXT_PROOF", textKey: text || "ERP PROOF" }
+      }],
+      { synchronousExecution: true, modalBehavior: "execute" }
+    );
   }
 
   async function run(){
-
+    log("CLICK geldi ✅");
     await ensureDoc();
 
+    // Alert kanıtı
+    try{
+      await core.showAlert("KANIT ✅\nButon çalıştı.\nŞimdi Text Layer eklenecek.");
+      log("Alert OK");
+    }catch(e){
+      log("Alert FAIL: " + (e?.message || e));
+    }
+
+    // Modal + Text layer
     await core.executeAsModal(async ()=>{
+      await addTextLayerBatch("ERP 27.0 TEST");
+    }, { commandName: "ERP Test Text Layer" });
 
-      await createSpot("#FF0000","18-1660_RED_TEST");
-
-      log("SPOT OK ✅ 18-1660_RED_TEST oluşturuldu");
-
-    },{commandName:"Create Spot Channel"});
-
+    log("Text Layer OK ✅ (Layers panelinde ERP_TEXT_PROOF)");
   }
 
-  function wire(){
-    $("btnRun").addEventListener("click", async ()=>{
-      try{
-        await run();
-      }catch(e){
-        log("HATA: "+e.message);
-      }
+  document.addEventListener("DOMContentLoaded", ()=>{
+    log("BOOT OK ✅ main.js çalıştı");
+    const btn = $("btnRun");
+    if(!btn){
+      log("HATA: btnRun bulunamadı (index.html eski olabilir)");
+      return;
+    }
+    btn.addEventListener("click", async ()=>{
+      btn.disabled = true;
+      try{ await run(); }
+      catch(e){ log("HATA: " + (e?.message || e)); try{ await core.showAlert("HATA:\n"+(e?.message||e)); }catch{} }
+      finally{ btn.disabled = false; }
     });
-  }
-
-  document.addEventListener("DOMContentLoaded", wire);
-
+  });
 })();

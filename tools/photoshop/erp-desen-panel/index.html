@@ -2,23 +2,16 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="./style.css" />
+    <style>
+      body{font-family:system-ui; padding:12px;}
+      button{width:100%; padding:10px; border-radius:12px;}
+      #log{margin-top:12px; border:1px solid #999; border-radius:12px; padding:10px; min-height:120px; white-space:pre-wrap;}
+    </style>
   </head>
   <body>
-    <h2>ERP Desen Panel</h2>
-
-    <div id="status" class="badge no">Hazır (PSD açık olmalı)</div>
-
-    <div class="card">
-      <button id="btnRun">KANIT TEST: Alert + Text + Alpha</button>
-
-      <div class="row" style="margin-top:10px;">
-        <label>Metin</label>
-        <input id="txt" type="text" value="AKS: AKS-0001 | Tarih: 2026-01-30" />
-      </div>
-
-      <div id="log" class="log">LOG: Panel yüklendi. Butona basınca Photoshop'ta alert görmen lazım.</div>
-    </div>
+    <h3>ERP Desen Panel (PS 27.0 TEST)</h3>
+    <button id="btnRun">TEST: Alert + Text Layer</button>
+    <div id="log">BOOT bekleniyor...</div>
 
     <script src="./main.js"></script>
   </body>
