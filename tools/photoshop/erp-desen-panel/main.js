@@ -1,4 +1,10 @@
-﻿(function () {
+﻿(function(){
+  try{
+    const el=document.getElementById('log');
+    if(el){ el.textContent = (new Date().toLocaleTimeString()) + '  LOG BOOT: main.js çalıştı ✅\n' + el.textContent; }
+  }catch(e){}
+})();
+(function () {
   function $(id) { return document.getElementById(id); }
   function now() { return new Date().toLocaleTimeString(); }
 
@@ -189,3 +195,4 @@
 
   document.addEventListener("DOMContentLoaded", wire);
 })();
+

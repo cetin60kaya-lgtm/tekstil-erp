@@ -1,10 +1,13 @@
 ﻿:root { --pad: 12px; }
-body { margin:0; padding: var(--pad); font-family: system-ui, Arial, sans-serif; }
+html, body { height: 100%; }
+body { margin:0; padding: var(--pad); font-family: system-ui, Arial, sans-serif; overflow: auto; }
 h2 { margin: 0 0 10px 0; font-size: 16px; }
+
 .card { border: 1px solid #444; border-radius: 14px; padding: 12px; }
 .row { display:flex; gap:10px; align-items:center; margin-bottom:10px; }
 label { width: 72px; opacity: .9; }
 input { flex:1; padding: 9px 10px; border-radius: 12px; border: 1px solid #666; background:#1f1f1f; color:#fff; }
+
 button {
   width: 100%;
   padding: 10px;
@@ -16,13 +19,25 @@ button {
   cursor:pointer;
 }
 button:hover { background:#333; }
-button:disabled {
-  opacity: .45;
-  cursor:not-allowed;
-}
-.small { font-size: 12px; opacity: .85; margin-top: 10px; }
-.log { margin-top: 10px; font-size: 12px; opacity: .95; white-space: pre-wrap; border-top: 1px dashed #555; padding-top: 10px; }
+button:disabled { opacity: .45; cursor:not-allowed; }
+
 .badge { display:inline-block; padding:4px 10px; border-radius: 999px; border:1px solid #666; font-size:12px; margin-bottom:10px; }
 .badge.ok { border-color:#4caf50; }
 .badge.no { border-color:#ff5252; }
+
 hr { border: none; border-top: 1px solid #444; margin: 12px 0; }
+
+/* LOG: her durumda görünür + kaydırılabilir */
+.log {
+  margin-top: 12px;
+  border: 1px solid #555;
+  border-radius: 12px;
+  padding: 10px;
+  min-height: 120px;
+  max-height: 200px;
+  overflow: auto;
+  background: #151515;
+  font-size: 12px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+}
