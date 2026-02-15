@@ -44,10 +44,6 @@
     return r?.[0]?.channels || [];
   }
 
-  function ids(chs){
-    return new Set((chs||[]).map(c=>c?._id).filter(Boolean));
-  }
-
   async function renameChannelById(channelId, newName){
     await action.batchPlay(
       [{
@@ -59,11 +55,9 @@
     );
   }
 
-  function pickNewChannel(before, after){
-    const b = ids(before);
-    const candidates = (after||[]).filter(c => c && c._id && !b.has(c._id));
-    // genelde action en sona ekler; yoksa ilk farkı al
-    return candidates[candidates.length - 1] || null;
+  function pickLastChannel(after){
+    if(!after || after.length === 0) return null;
+    return after[after.length - 1] || null;
   }
 
   async function run(){
@@ -73,34 +67,33 @@
     if(!newName) throw new Error("Kanal adı boş olamaz.");
 
     await core.executeAsModal(async ()=>{
-      log("Channels BEFORE okunuyor...");
-      const before = await getChannels();
-
       log("Action: erp / ERP_Spot_Create çalıştırılıyor...");
       await playAction("ERP_Spot_Create", "erp");
 
-      log("Channels AFTER okunuyor...");
+      log("Channels okunuyor...");
       const after = await getChannels();
 
-      const created = pickNewChannel(before, after);
-      if(!created){
-        log("HATA: Yeni kanal bulunamadı. (Action spot açmamış olabilir)");
-        try{ await core.showAlert("HATA ❌\nYeni spot kanal tespit edilemedi."); }catch{}
+      const last = pickLastChannel(after);
+      if(!last || !last._id){
+        log("HATA: Son kanal bulunamadı.");
+        try{ await core.showAlert("HATA ❌\nSon kanal tespit edilemedi."); }catch{}
         return;
       }
 
-      log(`Yeni kanal bulundu: id=${created._id} name="${created.name}"`);
+      log(`Son kanal: "${last.name}" (id=${last._id})`);
       log(`Rename -> "${newName}"`);
-      await renameChannelById(created._id, newName);
+      await renameChannelById(last._id, newName);
 
       log("OK ✅ Spot kanal adı güncellendi.");
-      try{ await core.showAlert("OK ✅\nSpot açıldı ve isim verildi:\n" + newName + "\n\nWindow > Channels kontrol et."); }catch{}
-    }, { commandName:"ERP: Spot Create + Rename" });
+      try{ await core.showAlert("OK ✅\nSpot açıldı ve isim verildi:\n" + newName); }catch{}
+    }, { commandName:"ERP: Spot Create + Rename (Last)" });
   }
 
   document.addEventListener("DOMContentLoaded", ()=>{
-    log("BOOT OK ✅ (spot+rename)");
+    log("BOOT OK ✅ (rename-last)");
     const btn = $("btnRun");
+    if(!btn){ log("HATA: btnRun yok"); return; }
+
     btn.addEventListener("click", async ()=>{
       btn.disabled = true;
       try{ await run(); }
