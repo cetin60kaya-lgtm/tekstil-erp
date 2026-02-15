@@ -7,6 +7,8 @@
   <body>
     <h2>ERP Desen Panel</h2>
 
+    <div id="docBadge" class="badge no">Doküman: YOK (PSD aç)</div>
+
     <div class="card">
       <div class="row">
         <label>Metin</label>
@@ -19,13 +21,13 @@
       <hr />
 
       <div class="row">
-        <label>Kanal Adı</label>
-        <input id="chName" type="text" value="ERP_SPOT_01 - 18-1663 Kırmızı" />
+        <label>Kanal</label>
+        <input id="chName" type="text" value="ERP_CH_01 - 18-1663 Kırmızı" />
       </div>
-      <button id="btnSpot">Test 3: Kanal Oluştur (Alpha/Spot Test)</button>
+      <button id="btnCh">Test 3: Kanal Oluştur (Alpha)</button>
 
       <div class="small">
-        Not: Bu test “kanal oluşturma” altyapısını doğrular. Bir sonraki adımda bunu gerçek Spot Channel + renk atama + isim standardına yükselteceğiz.
+        Eğer buton tıklanmazsa: log'a “UI hazır” yazısını ve tıklama loglarını görmen lazım.
       </div>
 
       <div id="log" class="log"></div>
