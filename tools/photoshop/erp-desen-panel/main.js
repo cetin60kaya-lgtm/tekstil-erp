@@ -30,13 +30,14 @@
     );
   }
 
-  async function renameActiveChannel(newName){
-    // targetEnum = aktif (seçili) kanal
+  async function fillSelectionWhite(){
+    // Seçili alanı aktif hedefe (şu an spot channel) beyazla doldurur.
     await action.batchPlay(
       [{
-        _obj: "set",
-        _target: [{ _ref: "channel", _enum: "ordinal", _value: "targetEnum" }],
-        to: { _obj: "channel", name: newName }
+        _obj: "fill",
+        using: { _enum: "fillContents", _value: "white" },
+        opacity: { _unit: "percentUnit", _value: 100 },
+        mode: { _enum: "blendMode", _value: "normal" }
       }],
       { synchronousExecution: true, modalBehavior: "execute" }
     );
@@ -45,29 +46,25 @@
   async function run(){
     await ensureDoc();
 
-    const newName = ($("chName")?.value || "").trim();
-    if(!newName) throw new Error("Kanal adı boş olamaz.");
-
     await core.executeAsModal(async ()=>{
-      log("Action: erp / ERP_Spot_Create çalıştırılıyor...");
+      log("Action: erp / ERP_Spot_Create");
       await playAction("ERP_Spot_Create", "erp");
       log("OK ✅ Spot açıldı (aktif kanal spot olmalı).");
 
-      log(`Rename aktif kanal -> "${newName}"`);
-      await renameActiveChannel(newName);
-      log("OK ✅ Kanal adı verildi.");
+      log("Fill: selection -> white");
+      await fillSelectionWhite();
+      log("OK ✅ Seçim spot kanala basıldı (kanal artık dolu).");
 
       try{
-        await core.showAlert("OK ✅\nSpot açıldı ve isim verildi:\n" + newName + "\n\nWindow > Channels kontrol et.");
+        await core.showAlert("OK ✅\nSpot açıldı ve seçim kanala basıldı.\n\nWindow > Channels kontrol et.");
       }catch{}
-    }, { commandName:"ERP: Spot Create + Rename (Active Channel)" });
+    }, { commandName:"ERP: Spot Create + Fill" });
   }
 
   document.addEventListener("DOMContentLoaded", ()=>{
-    log("BOOT OK ✅ (rename-active)");
+    log("BOOT OK ✅ (spot+fill)");
     const btn = $("btnRun");
     if(!btn){ log("HATA: btnRun yok"); return; }
-
     btn.addEventListener("click", async ()=>{
       btn.disabled = true;
       try{ await run(); }
