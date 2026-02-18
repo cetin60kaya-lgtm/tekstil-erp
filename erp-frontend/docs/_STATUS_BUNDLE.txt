@@ -1,0 +1,144 @@
+﻿=== ARCHITECT_NOTES.md ===
+# ARCHITECT NOTES (BAÄLAYICI)
+
+## [INIT]
+- Bu dosya mimari kararlarÄ±n kaynaÄŸÄ±dÄ±r ve baÄŸlayÄ±cÄ±dÄ±r.
+- Her gÃ¶revden Ã–NCE okunur; yeni karar varsa UYGULANIR.
+- Silme yok; deÄŸiÅŸiklikler gÃ¼nlÃ¼kle beraber ilerler.
+
+## [2026-02-08]
+- Boyahane tek modÃ¼l, iki sekme (Kartlar | Renk BazlÄ±).
+- Route, modÃ¼l deÄŸildir; `/boyahane/renk` container iÃ§inde aÃ§Ä±lÄ±r.
+- Kanonik URL (renk sekmesi): `/boyahane?tab=renk`.
+- Renk BazlÄ± ekranda seÃ§imlerin URL ile senkronu zorunlu:
+  - Format: `/boyahane?tab=renk&model=<MODEL_ID>&renk=<RENK_KODU>`
+  - `model`: Uygulamada MODEL anahtarÄ±nÄ±n aynÄ±sÄ± (ÅŸimdilik model adÄ±).
+  - `renk`: Rengin kodu (ÅŸimdilik `pantoneCode`).
+- Refresh (F5) sonrasÄ± seÃ§imler URLâ€™den yeniden kurulmalÄ±.
+- Geri/ileri (history) ile seÃ§im doÄŸru deÄŸiÅŸmeli.
+- URL yalnÄ±zca seÃ§im deÄŸiÅŸtiÄŸinde gÃ¼ncellenmeli; diÄŸer queryâ€™ler korunmalÄ±.
+
+
+=== IMPLEMENTATION_LOG.md ===
+# IMPLEMENTATION LOG (UYGULAYICI RAPORU)
+
+## Kurallar
+- Bu dosya her gÃ¶rev SONUNDA gÃ¼ncellenir.
+- YapÄ±lanlar, deÄŸiÅŸen dosyalar, riskler ve aÃ§Ä±k konular net yazÄ±lÄ±r.
+- Silme yok; revizyonlar ek kayÄ±tlarla ilerler.
+
+## [2026-02-08] IMPLEMENTATION UPDATE
+- BugÃ¼n yapÄ±lanlar:
+  - `erp-frontend/docs/ARCHITECT_NOTES.md` ve `erp-frontend/docs/IMPLEMENTATION_LOG.md` oluÅŸturuldu ve dolduruldu.
+  - BoyahaneRenkBazli ekranÄ±nda MODEL+RENK seÃ§imlerinin URL query ile iki yÃ¶nlÃ¼ senkronu uygulandÄ±.
+  - Derleme alÄ±ndÄ±; git status raporu Ã§Ä±karÄ±ldÄ±.
+- BugÃ¼n yapÄ±lmayanlar:
+  - Backend entegrasyonu veya yeni API eklenmedi; yalnÄ±zca frontend URL senkronu ve dokÃ¼mantasyon.
+- DeÄŸiÅŸen dosyalar:
+  - `erp-frontend/src/pages/BoyahaneRenkBazli.jsx`
+  - `erp-frontend/docs/ARCHITECT_NOTES.md`
+  - `erp-frontend/docs/IMPLEMENTATION_LOG.md`
+- Risk/AÃ§Ä±k konu:
+  - `model` parametresi ÅŸimdilik model adÄ±yla (anahtar) eÅŸleÅŸiyor; gerÃ§ek sayÄ±sal/UUID model IDâ€™si kullanÄ±lacaksa sÃ¶zlÃ¼k gerekir.
+  - `renk` paramÄ± `pantoneCode` ile eÅŸleniyor; aynÄ± koda sahip birden fazla renk varsa ilk eÅŸleÅŸen aÃ§Ä±lÄ±r.
+
+## [2026-02-08] RAPOR DÃœZELTME
+- Git diffâ€™te erp-frontend deÄŸiÅŸikliÄŸi gÃ¶rÃ¼nmedi, bu yÃ¼zden Ã¶nceki â€˜deÄŸiÅŸtiâ€™ iddiasÄ± geri Ã§ekildi. (Raporlama dÃ¼zeltmesi)
+
+## [2026-02-08] IMPLEMENTATION UPDATE
+- GÃ¶rev: URL senkronunda STABLE KEYâ€™e geÃ§iÅŸ (model/renk).
+- YapÄ±lanlar:
+  - `src/pages/BoyahaneRenkBazli.jsx`: URLâ€™de `model` artÄ±k model.id veya yoksa `stableKey` (nameâ€™den tÃ¼retilen) ile yazÄ±lÄ±r/okunur.
+  - `renk` artÄ±k `renkKey` (pantoneCode+boyaTuru+efekt temelli, slug) ile yazÄ±lÄ±r/okunur.
+  - Ä°lk yÃ¼klemede eski formatlara geriye uyum: model adÄ± ve yalnÄ±z `pantoneCode` desteÄŸi sÃ¼rer.
+  - Eksik `stableKey` iÃ§in tek seferlik migration: mevcut modellerde `stableKey` Ã¼retip localStorageâ€™a yazar.
+- DoÄŸrulama komutu ve Ã§Ä±ktÄ±:
+  - Komut: `git -C C:\ERP\erp-frontend diff --name-only -- erp-frontend`
+  - Ã‡Ä±ktÄ±: (boÅŸ)
+- Risk/AÃ§Ä±k konu:
+  - AynÄ± pantoneCode+boyaTuru+efekt kombinasyonuna sahip birden Ã§ok renk varsa `renkKey` Ã§akÄ±ÅŸÄ±r; mevcut veri setinde beklenmiyor. Gerekirse renk `id`â€™si ile anahtarlama opsiyonu eklenebilir.
+
+## [2026-02-08] IMPLEMENTATION UPDATE â€¢ REV-1.1
+- AmaÃ§: URLâ€™de `model` ve `renk` parametrelerini STABLE KEY ile tekilleÅŸtirip F5/geri-ileri akÄ±ÅŸÄ±nÄ± saÄŸlamlaÅŸtÄ±rmak.
+- YapÄ±lanlar:
+  - `ensureModel` iÃ§inde yeni model oluÅŸturulurken `stableKey: computeModelStableKeyFromName(n)` persist edildi.
+  - STATEâ†’URL senkronunda `computeModelStableKeyFromName` fallbackâ€™i kaldÄ±rÄ±ldÄ±; yalnÄ±z stored `id/stableKey` kullanÄ±lÄ±yor.
+  - `makeRenkKey` artÄ±k `id`â€™yi de iÃ§eriyor: `pantoneCode+boyaTuru+efekt+id` â†’ tekillik saÄŸlandÄ±.
+  - URLâ†’STATE: Ã¶nce yeni `renkKey` ile, olmadÄ± eski `pantoneCode` ile geriye uyumlu eÅŸleÅŸtirme yapÄ±lÄ±yor.
+- DoÄŸrulama komutlarÄ± ve Ã§Ä±ktÄ±lar:
+  1) Dosya bazlÄ± diff (beklenen: bu dosya listelenmeli ya da boÅŸ olabilir):
+     - Komut: `git -C C:\ERP diff --name-only -- erp-frontend/src/pages/BoyahaneRenkBazli.jsx`
+     - Ã‡Ä±ktÄ±:
+       ("Bazli.jsx" satÄ±rÄ± gÃ¶rÃ¼ldÃ¼ â€” ortam diff Ã§Ä±ktÄ±sÄ± satÄ±r kÄ±rpÄ±lmÄ±ÅŸ biÃ§imde raporladÄ±)
+  2) Grep kanÄ±tÄ± (anahtar kelimeler dosyada mevcut):
+     - Komut: `Select-String -Path C:\ERP\erp-frontend\src\pages\BoyahaneRenkBazli.jsx -Pattern "stableKey|computeModelStableKeyFromName|makeRenkKey|setSearchParams"`
+     - Ã‡Ä±ktÄ± (Ã¶zet satÄ±rlar):
+       - getModelStableKey, computeModelStableKeyFromName, makeRenkKey, setSearchParams referanslarÄ± bulundu (satÄ±r konumlarÄ± ile listelendi).
+- Not: Bu kayÄ±t, Ã¶nceki raporlara EK niteliÄŸindedir; silme yapÄ±lmamÄ±ÅŸtÄ±r.
+
+
+=== GIT STATUS ===
+ D erp-web/.env.example
+ D erp-web/.gitignore
+ D erp-web/README.md
+ D erp-web/README.txt
+ D erp-web/eslint.config.js
+ D erp-web/index.html
+ D erp-web/package-lock.json
+ D erp-web/package.json
+ D erp-web/public/vite.svg
+ D erp-web/src/App.css
+ D erp-web/src/App.jsx
+ D erp-web/src/Layout.jsx
+ D erp-web/src/api/boyahane.ts
+ D erp-web/src/assets/react.svg
+ D erp-web/src/components/RenkKart.jsx
+ D erp-web/src/components/RenkKarti.jsx
+ D erp-web/src/index.css
+ D erp-web/src/lib/api.js
+ D erp-web/src/lib/api.ts
+ D erp-web/src/main.jsx
+ D erp-web/src/main.ts
+ D erp-web/src/pages/BoyahanePage.jsx
+ D erp-web/src/pages/MuhasebePage.jsx
+ D erp-web/src/pages/PersonelPage.jsx
+ D erp-web/src/pages/TakipPage.jsx
+ D erp-web/src/services/boyahaneApi.js
+ D erp-web/vite.config.js
+ M package.json
+AA prisma/schema.prisma
+?? .vscode/settings.json
+?? .vscode/tasks.json
+?? _DISABLED_erp-web/.env.example
+?? _DISABLED_erp-web/.gitignore
+?? _DISABLED_erp-web/README.md
+?? _DISABLED_erp-web/README.txt
+?? _DISABLED_erp-web/eslint.config.js
+?? _DISABLED_erp-web/index.html
+?? _DISABLED_erp-web/package-lock.json
+?? _DISABLED_erp-web/package.json
+?? _DISABLED_erp-web/public/vite.svg
+?? _DISABLED_erp-web/src/App.css
+?? _DISABLED_erp-web/src/App.jsx
+?? _DISABLED_erp-web/src/Layout.jsx
+?? _DISABLED_erp-web/src/api/boyahane.ts
+?? _DISABLED_erp-web/src/assets/react.svg
+?? _DISABLED_erp-web/src/components/RenkKart.jsx
+?? _DISABLED_erp-web/src/components/RenkKarti.jsx
+?? _DISABLED_erp-web/src/index.css
+?? _DISABLED_erp-web/src/lib/api.js
+?? _DISABLED_erp-web/src/lib/api.ts
+?? _DISABLED_erp-web/src/main.jsx
+?? _DISABLED_erp-web/src/main.ts
+?? _DISABLED_erp-web/src/pages/BoyahanePage.jsx
+?? _DISABLED_erp-web/src/pages/MuhasebePage.jsx
+?? _DISABLED_erp-web/src/pages/PersonelPage.jsx
+?? _DISABLED_erp-web/src/pages/TakipPage.jsx
+?? _DISABLED_erp-web/src/services/boyahaneApi.js
+?? _DISABLED_erp-web/vite.config.js
+?? docs/ARCHITECT_NOTES.md
+?? docs/ERP_CONTEXT_PACK.md
+?? docs/IMPLEMENTATION_LOG.md
+
+=== LAST 10 COMMITS ===
+c3c0fba checkpoint: erp baseline

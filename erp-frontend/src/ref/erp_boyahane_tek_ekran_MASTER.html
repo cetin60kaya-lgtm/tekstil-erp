@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>ERP • Boyahane Tek Ekran (MASTER: Kayıtlı Renkler Üstte + Log Altta)</title>
+<style>
+  :root{
+    --bg:#f5f5f5; --card:#fff; --line:#d1d5db; --muted:#6b7280; --soft:#fafafa; --black:#111;
+    --accent:#eef2ff;
+  }
+  *{box-sizing:border-box;font-family:Arial,sans-serif;}
+  body{margin:0;background:var(--bg);color:#111;}
+  header{
+    position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);
+    padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  }
+  .title{font-weight:900;letter-spacing:.2px}
+  .muted{font-size:12px;color:var(--muted)}
+  .btn{border:1px solid var(--line);background:#fff;padding:7px 10px;border-radius:8px;font-weight:800;cursor:pointer}
+  .btn.dark{background:var(--black);border-color:var(--black);color:#fff}
+  .btn.warn{background:#fff7ed;border-color:#fed7aa}
+  .pill{display:inline-block;font-size:11px;font-weight:900;padding:3px 8px;border-radius:999px;border:1px solid var(--line);background:#fff}
+  .pill.ok{background:#ecfdf5;border-color:#a7f3d0}
+  .pill.warn{background:#fff7ed;border-color:#fed7aa}
+  .pill.off{background:#f3f4f6;border-color:#e5e7eb}
+
+  main{max-width:1680px;margin:0 auto;padding:14px;display:grid;gap:12px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;}
+  .field{display:grid;gap:4px;}
+  .field label{font-size:12px;color:var(--muted);font-weight:800}
+  .field input,.field select,.field textarea{
+    padding:7px;border:1px solid var(--line);border-radius:8px;width:100%;background:#fff;
+  }
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+  .subhead{font-weight:900}
+  .headRow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .divider{height:1px;background:var(--line);margin:10px 0}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+
+  /* TOP GRID */
+  .topGrid{display:grid;grid-template-columns:300px 460px 1fr;gap:12px;align-items:start;}
+  .modelImg{
+    height:260px;border:1px dashed #9ca3af;border-radius:10px;background:var(--soft);
+    display:grid;place-items:center;color:var(--muted);font-weight:900;
+  }
+
+  /* MODEL COLORS LIST */
+  .list{border:1px solid var(--line);border-radius:10px;background:var(--soft);display:flex;flex-direction:column;min-height:360px}
+  .listHead{padding:10px;border-bottom:1px solid var(--line);background:#fff;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+  .listBody{overflow:auto;max-height:360px;}
+  .item{padding:10px;border-bottom:1px solid var(--line);cursor:pointer}
+  .item:hover{background:#f3f4f6}
+  .item.active{background:var(--accent)}
+  .itemTop{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .bigCode{font-weight:900;font-size:14px}
+  .bigPage{font-weight:900}
+  .smallName{font-size:12px;color:#374151;margin-top:2px}
+  .noTag{font-weight:900}
+
+  /* TABLE (tight) */
+  .tableWrap{border:1px solid var(--line);border-radius:10px;overflow:auto;background:#fff;}
+  table{border-collapse:collapse;width:100%;min-width:1100px;}
+  th,td{border:1px solid var(--line);padding:5px 6px;font-size:13px;white-space:nowrap;vertical-align:middle;}
+  th{background:#f3f4f6;font-weight:900;text-align:left;}
+  .cell{width:100%;height:26px;padding:4px 6px;border:1px solid #cbd5e1;border-radius:4px;font-size:13px;background:#fff;}
+  .cell.num{text-align:right;}
+  .xbtn{width:28px;height:26px;border:1px solid var(--line);background:#fff;border-radius:6px;cursor:pointer;font-weight:900}
+
+  /* Kat + totals bar */
+  .bar{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;
+  }
+  .leftBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .inKat{width:70px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;font-weight:900;text-align:right}
+  .scrollHint{font-size:11px;color:var(--muted)}
+
+  /* MASTER: Registered (TOP) + Log (BOTTOM) */
+  .stack{display:flex;flex-direction:column;gap:12px}
+  .stackCard{border:1px solid var(--line);border-radius:10px;background:#fff;overflow:hidden}
+  .stackH{
+    padding:10px 12px;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    background:#fff;
+  }
+  .stackH b{font-size:13px}
+  .stackH span{font-size:12px;color:var(--muted)}
+  .stackB{padding:10px 12px;max-height:280px;overflow:auto;background:#fff}
+  .searchRow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .searchRow input{
+    width:280px;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#fff;
+    font-size:12px;outline:none
+  }
+  .searchRow input:focus{border-color:#93c5fd}
+  .miniList{display:flex;flex-direction:column;gap:8px}
+  .miniItem{
+    border:1px solid #e5e7eb;border-radius:10px;padding:10px;cursor:pointer;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:#fff;
+  }
+  .miniItem:hover{background:#f9fafb}
+  .miniItem .l{display:flex;gap:10px;align-items:center;min-width:0}
+  .sw{width:16px;height:16px;border-radius:5px;border:1px solid #d1d5db;flex:0 0 auto}
+  .info{min-width:0}
+  .info b{font-size:12px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .info small{font-size:12px;color:var(--muted);display:block;margin-top:3px}
+  .tag{font-size:11px;font-weight:900;border:1px solid var(--line);border-radius:999px;padding:2px 8px;background:#fff}
+  .tag.dim{color:#6b7280}
+
+  @media(max-width:1100px){
+    .topGrid{grid-template-columns:1fr}
+    .searchRow input{width:100%}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="title">ERP • BOYAHANE (TEK EKRAN) — MASTER</div>
+    <span class="pill ok">REV-1</span>
+    <span class="muted">Model → Renk (NO) → Boya Yapımı → Kaydet → Log</span>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn" id="btnUpdate">Güncelle</button>
+    <button class="btn dark" id="btnSave">Kaydet</button>
+    <button class="btn warn" id="btnPassive">Pasif</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- TOP: Model + Model Renkleri + Üst Bilgi -->
+  <section class="card">
+    <div class="topGrid">
+      <!-- Model -->
+      <div style="display:grid;gap:10px">
+        <div class="field"><label>MODEL ADI</label><input id="modelName" value="NAYSEN"/></div>
+        <div class="modelImg">MODEL GÖRSELİ</div>
+        <div class="field"><label>AÇIKLAMA</label><textarea id="modelDesc" rows="3" placeholder="Not..."></textarea></div>
+      </div>
+
+      <!-- Model Renkleri -->
+      <div class="list">
+        <div class="listHead">
+          <div>
+            <div class="subhead">MODEL RENKLERİ</div>
+            <div class="muted">NO 1..N • Renk kodu ve sayfa no büyük • Renk adı küçük</div>
+          </div>
+          <button class="btn" id="btnAddColor">Renk Ekle</button>
+        </div>
+        <div class="listBody" id="colorList"></div>
+        <div style="padding:8px 10px;background:#fff;border-top:1px solid var(--line)">
+          <div class="scrollHint">12–15 renk için scroll aktif.</div>
+        </div>
+      </div>
+
+      <!-- Üst Bilgi -->
+      <div style="display:grid;gap:12px">
+        <div class="card" style="background:var(--soft)">
+          <div class="headRow">
+            <div>
+              <div class="subhead">ÜST BİLGİ</div>
+              <div class="muted">Zemin / Tarih / Adet / Sorumlu</div>
+            </div>
+            <span class="pill warn" id="dirtyBadge" style="display:none">Kaydedilmemiş</span>
+          </div>
+          <div style="height:8px"></div>
+          <div class="row">
+            <div class="field" style="min-width:160px;flex:1"><label>Zemin</label><input id="zemin" value="EKRU"/></div>
+            <div class="field" style="min-width:160px;flex:1"><label>Tarih</label><input id="tarih" type="date"/></div>
+            <div class="field" style="min-width:120px;flex:.7"><label>Adet</label><input id="adet" type="number" placeholder="0"/></div>
+            <div class="field" style="min-width:220px;flex:1.2"><label>Sorumlu</label><input id="sorumlu" placeholder="Çetin Usta"/></div>
+          </div>
+        </div>
+
+        <div class="card" style="background:var(--soft)">
+          <div class="subhead">Bilgi</div>
+          <div class="muted">Kayıtlı Renkler + Log artık sayfanın en altında (üstte kayıtlı, altta log).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Renk Bilgisi -->
+  <section class="card">
+    <div class="headRow">
+      <div>
+        <div class="subhead">RENK BİLGİSİ</div>
+        <div class="muted">“Pantone” adı yok: Renk Kodu (Pantone/Müşteri kodu) olarak geçer</div>
+      </div>
+      <span class="pill off" id="statusPill">—</span>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div style="background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:10px">
+      <div style="display:grid;grid-template-columns:120px 1fr 220px 160px 200px;gap:10px;align-items:end" id="colorInfoGrid">
+        <div class="field"><label>Renk No</label><input id="fNo" class="mono" value="NO 1"/></div>
+
+        <div class="field">
+          <label>Renk Adı (küçük)</label>
+          <input id="fName" value="AÇIK MAVİ"/>
+        </div>
+
+        <div class="field">
+          <label>Renk Kodu (büyük)</label>
+          <input id="fCode" class="mono" value="18-1663"/>
+        </div>
+
+        <div class="field">
+          <label>Sayfa No (büyük)</label>
+          <input id="fPage" class="mono" value="136"/>
+        </div>
+
+        <div class="field">
+          <label>Boya Türü</label>
+          <select id="fBoya">
+            <option>SUBAZLI</option>
+            <option>ECOPLAST</option>
+            <option>SİLİKON</option>
+            <option>VARAK TUTKALI</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Boya Yapımı -->
+  <section class="card">
+    <div class="headRow">
+      <div>
+        <div class="subhead">BOYA YAPIMI (TEK TABLO)</div>
+        <div class="muted">NO1..N = pigment/ürün satırı • GR4 sabit • satırlar sıkı</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="addRow">+ NO Satırı</button>
+      </div>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <!-- ÜST BAR: Kat + Toplamlar aynı hizada -->
+    <div class="bar">
+      <div class="leftBar">
+        <span class="pill">Toplam %: <span id="sumPct" class="mono">0</span></span>
+        <span class="pill">Katlı Toplam: <span id="sumKat" class="mono">0</span></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="muted" style="font-weight:800">Kat</span>
+        <input id="kat" class="inKat mono" type="number" min="1" step="1" value="1"/>
+      </div>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="tableWrap">
+      <table id="mix">
+        <thead>
+          <tr>
+            <th>NO</th>
+            <th>Ürün / Pigment</th>
+            <th>Marka</th>
+            <th>LOT</th>
+            <th>%</th>
+            <th class="mono">GR/KG</th>
+            <th class="mono">GR1</th>
+            <th class="mono">GR2</th>
+            <th class="mono">GR3</th>
+            <th class="mono">GR4</th>
+            <th>Not</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- MASTER: Registered (TOP wide) + Log (BOTTOM) -->
+  <section class="card">
+    <div class="headRow">
+      <div>
+        <div class="subhead">KAYITLI RENKLER + İŞLEM LOGU</div>
+        <div class="muted">Üstte Kayıtlı Renkler (arama) • Altta Log • tıkla uygula / geri yükle • sıra bozulmaz</div>
+      </div>
+      <span class="pill off" id="masterInfoPill">LOCAL</span>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="stack">
+      <!-- Registered TOP -->
+      <div class="stackCard">
+        <div class="stackH">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <b>Kayıtlı Renkler (Seçili Renk Koduna Göre)</b>
+            <span>Arama sadece filtreler, orderIndex sırası BOZULMAZ</span>
+          </div>
+          <div class="searchRow">
+            <input id="regSearch" placeholder="Ara: renk kodu, boya türü, versiyon, kayıt id..." />
+            <span class="tag dim" id="regCount">0</span>
+          </div>
+        </div>
+        <div class="stackB">
+          <div class="miniList" id="registeredList"></div>
+        </div>
+      </div>
+
+      <!-- Log BOTTOM -->
+      <div class="stackCard">
+        <div class="stackH">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <b>Model Boyahane İşlem Logu</b>
+            <span>Kaydet → yeni log • Log tıkla → snapshot geri yükle</span>
+          </div>
+          <span class="tag dim" id="logCount">0</span>
+        </div>
+        <div class="stackB">
+          <div class="miniList" id="logList"></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<script>
+/* =========================
+   MASTER STORAGE KEYS
+   - order bozulmaz: orderIndex
+========================= */
+const LS_POOL = "boyahane_color_pool_v1";
+const LS_LOG  = "boyahane_islem_log_v1";
+const LS_ACTIVE = "boyahane_active_snapshot_v1";
+
+const uid = () => Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
+const esc = (s)=>String(s??"")
+  .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
+const num = (v)=>{ const n=Number(v); return Number.isFinite(n)?n:0; };
+const round2 = (n)=> Math.round((Number(n)||0)*100)/100;
+const nowTR = ()=> new Date().toLocaleString("tr-TR");
+
+const el = (id)=>document.getElementById(id);
+
+/* =========================
+   REV-1 Demo State (Model Colors + Mix)
+========================= */
+const state = {
+  dirty:false,
+  kat:1,
+  colors:[
+    {id:'c1', no:1, code:'18-1663', page:'136', name:'AÇIK MAVİ', boya:'SUBAZLI', status:'AKTIF'},
+    {id:'c2', no:2, code:'13-2801', page:'112', name:'PEMBE', boya:'SUBAZLI', status:'AKTIF'},
+    {id:'c3', no:3, code:'12-1009', page:'98',  name:'TEN',      boya:'SUBAZLI', status:'DUZENLENMIS'},
+  ],
+  selectedId:'c1',
+  mixRows:[
+    {no:'NO1', urun:'S10 ŞEFFAF', marka:'URAS', lot:'23070321', pct:50, grkg:30, gr1:'', gr2:'', gr3:'', gr4:'', note:''},
+    {no:'NO2', urun:'S20 BEYAZ',  marka:'URAS', lot:'23070345', pct:50, grkg:120, gr1:'', gr2:'', gr3:'', gr4:'', note:''},
+  ],
+};
+
+const colorList = el('colorList');
+const dirtyBadge = el('dirtyBadge');
+const mixBody = el('mix').querySelector('tbody');
+
+function setDirty(v){
+  state.dirty = !!v;
+  dirtyBadge.style.display = state.dirty ? 'inline-block' : 'none';
+}
+function pillClass(status){
+  if(status==='AKTIF') return 'ok';
+  if(status==='DUZENLENMIS') return 'warn';
+  return 'off';
+}
+function pillText(status){
+  if(status==='AKTIF') return 'AKTİF';
+  if(status==='DUZENLENMIS') return 'DÜZENLENMİŞ';
+  return 'PASİF';
+}
+function getSelected(){
+  return state.colors.find(x=>x.id===state.selectedId) || state.colors[0];
+}
+
+function renderColorList(){
+  const sorted = [...state.colors].sort((a,b)=>a.no-b.no);
+  colorList.innerHTML = sorted.map(c=>{
+    const active = c.id===state.selectedId ? 'active' : '';
+    return `
+      <div class="item ${active}" data-id="${esc(c.id)}">
+        <div class="itemTop">
+          <div style="min-width:0">
+            <div class="bigCode">
+              <span class="noTag">NO ${esc(c.no)}</span>
+              <span> • </span>
+              <span class="mono">${esc(c.code || '-')}</span>
+              <span> • </span>
+              <span class="bigPage mono">S:${esc(c.page || '-')}</span>
+            </div>
+            <div class="smallName">${esc(c.name || '(Adsız)')}</div>
+          </div>
+          <span class="pill ${pillClass(c.status)}">${pillText(c.status)}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  colorList.querySelectorAll('.item').forEach(it=>{
+    it.addEventListener('click', ()=>{
+      state.selectedId = it.getAttribute('data-id');
+      setDirty(false);
+      renderRight();
+      renderColorList();
+      // seçili kod değişti -> kayıtlı listesi yenilenir
+      renderRegistered();
+    });
+  });
+}
+
+function renderRight(){
+  const c = getSelected();
+  if(!c) return;
+
+  el('fNo').value = 'NO ' + c.no;
+  el('fName').value = c.name || '';
+  el('fCode').value = c.code || '';
+  el('fPage').value = c.page || '';
+  el('fBoya').value = c.boya || 'SUBAZLI';
+
+  const pill = el('statusPill');
+  pill.className = 'pill ' + pillClass(c.status);
+  pill.textContent = pillText(c.status);
+
+  renderMixTable();
+  recomputeTotals();
+}
+
+function recomputeTotals(){
+  const sumPct = state.mixRows.reduce((a,r)=>a+(Number(r.pct)||0),0);
+  el('sumPct').textContent = String(round2(sumPct));
+  el('sumKat').textContent = String(round2(sumPct * (Number(state.kat)||1)));
+}
+
+function renderMixTable(){
+  mixBody.innerHTML = state.mixRows.map((r,i)=>`
+    <tr>
+      <td><input class="cell mono" data-i="${i}" data-k="no" value="${esc(r.no)}"/></td>
+      <td><input class="cell" data-i="${i}" data-k="urun" value="${esc(r.urun)}"/></td>
+      <td><input class="cell" data-i="${i}" data-k="marka" value="${esc(r.marka)}"/></td>
+      <td><input class="cell mono" data-i="${i}" data-k="lot" value="${esc(r.lot)}"/></td>
+      <td><input class="cell num" data-i="${i}" data-k="pct" type="number" step="0.01" value="${r.pct ?? ''}"/></td>
+      <td><input class="cell num mono" data-i="${i}" data-k="grkg" type="number" step="0.01" value="${r.grkg ?? ''}"/></td>
+      <td><input class="cell num mono" data-i="${i}" data-k="gr1" value="${esc(r.gr1)}"/></td>
+      <td><input class="cell num mono" data-i="${i}" data-k="gr2" value="${esc(r.gr2)}"/></td>
+      <td><input class="cell num mono" data-i="${i}" data-k="gr3" value="${esc(r.gr3)}"/></td>
+      <td><input class="cell num mono" data-i="${i}" data-k="gr4" value="${esc(r.gr4)}"/></td>
+      <td><input class="cell" data-i="${i}" data-k="note" value="${esc(r.note)}"/></td>
+      <td style="text-align:center"><button class="xbtn" data-del="${i}" title="Sil">×</button></td>
+    </tr>
+  `).join('');
+
+  mixBody.querySelectorAll('input').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const i = Number(inp.getAttribute('data-i'));
+      const k = inp.getAttribute('data-k');
+      let v = inp.value;
+      if(k==='pct' || k==='grkg') v = v==='' ? '' : Number(v);
+      state.mixRows[i][k]=v;
+      setDirty(true);
+      recomputeTotals();
+    });
+  });
+
+  mixBody.querySelectorAll('button[data-del]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = Number(b.getAttribute('data-del'));
+      state.mixRows.splice(i,1);
+      state.mixRows.forEach((x,idx)=>{ x.no = 'NO' + (idx+1); });
+      setDirty(true);
+      renderMixTable();
+      recomputeTotals();
+    });
+  });
+}
+
+/* =========================
+   REGISTERED + LOG (ORDER KİLİTLİ)
+========================= */
+function loadPool(){
+  try{
+    const raw = localStorage.getItem(LS_POOL);
+    if(raw) return JSON.parse(raw);
+  }catch{}
+  // demo seed (orderIndex sabit)
+  const seed = [
+    { id:"r001", createdAt:new Date().toISOString(), orderIndex:1, colorCode:"18-1663", colorName:"AÇIK MAVİ", boyaTuru:"SUBAZLI", version:"v1", hex:"#4aa3ff",
+      snapshot:{ mixRows:[...state.mixRows], kat:1, note:"seed" } },
+    { id:"r002", createdAt:new Date().toISOString(), orderIndex:2, colorCode:"18-1663", colorName:"AÇIK MAVİ", boyaTuru:"SUBAZLI", version:"v2", hex:"#4aa3ff",
+      snapshot:{ mixRows:[...state.mixRows], kat:2, note:"seed" } },
+    { id:"r003", createdAt:new Date().toISOString(), orderIndex:3, colorCode:"13-2801", colorName:"PEMBE", boyaTuru:"SUBAZLI", version:"v1", hex:"#ff6fb1",
+      snapshot:{ mixRows:[...state.mixRows], kat:1, note:"seed" } },
+  ];
+  localStorage.setItem(LS_POOL, JSON.stringify(seed));
+  return seed;
+}
+function savePool(pool){ localStorage.setItem(LS_POOL, JSON.stringify(pool)); }
+
+function loadLogs(){
+  try{
+    const raw = localStorage.getItem(LS_LOG);
+    if(raw) return JSON.parse(raw);
+  }catch{}
+  const seed = [];
+  localStorage.setItem(LS_LOG, JSON.stringify(seed));
+  return seed;
+}
+function saveLogs(logs){ localStorage.setItem(LS_LOG, JSON.stringify(logs)); }
+
+function saveActiveSnapshot(){
+  const c = getSelected();
+  const snap = {
+    selectedColorId: c?.id || null,
+    colorCode: c?.code || "",
+    boyaTuru: c?.boya || "",
+    kat: state.kat,
+    mixRows: state.mixRows
+  };
+  localStorage.setItem(LS_ACTIVE, JSON.stringify(snap));
+}
+function loadActiveSnapshot(){
+  try{
+    const raw = localStorage.getItem(LS_ACTIVE);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch{ return null; }
+}
+
+let POOL = loadPool();
+let LOGS = loadLogs();
+
+function renderRegistered(){
+  const c = getSelected();
+  const code = String(c?.code||"").trim();
+  const q = String(el('regSearch').value||"").trim().toLowerCase();
+
+  const listEl = el('registeredList');
+  listEl.innerHTML = "";
+
+  // orderIndex kilitli: önce orderIndex, sonra createdAt (fallback)
+  const ordered = [...POOL].sort((a,b)=>(a.orderIndex||0)-(b.orderIndex||0));
+
+  const matches = ordered
+    .filter(x=> String(x.colorCode||"") === code)
+    .filter(x=>{
+      if(!q) return true;
+      const hay = `${x.id} ${x.colorCode} ${x.boyaTuru} ${x.version} ${x.colorName}`.toLowerCase();
+      return hay.includes(q);
+    });
+
+  el('regCount').textContent = String(matches.length);
+
+  if(!code){
+    listEl.innerHTML = `<div class="muted">Seçili renk kodu boş. Önce renk kodu gir.</div>`;
+    return;
+  }
+  if(!matches.length){
+    listEl.innerHTML = `<div class="muted">Bu renk kodu için kayıt yok.</div>`;
+    return;
+  }
+
+  matches.forEach(rec=>{
+    const div = document.createElement("div");
+    div.className = "miniItem";
+    div.onclick = ()=> applyRegistered(rec);
+
+    div.innerHTML = `
+      <div class="l">
+        <div class="sw" style="background:${esc(rec.hex||'#777')}"></div>
+        <div class="info">
+          <b>${esc(rec.colorCode)} • ${esc(rec.version||'v?')} • ${esc(rec.boyaTuru||'-')}</b>
+          <small>KayıtID: ${esc(rec.id)} • Sıra: ${esc(rec.orderIndex)}</small>
+        </div>
+      </div>
+      <span class="tag dim">${esc(rec.boyaTuru||'-')}</span>
+    `;
+    listEl.appendChild(div);
+  });
+}
+
+function renderLogs(){
+  const logEl = el('logList');
+  logEl.innerHTML = "";
+
+  el('logCount').textContent = String(LOGS.length);
+
+  if(!LOGS.length){
+    logEl.innerHTML = `<div class="muted">Henüz log yok.</div>`;
+    return;
+  }
+
+  // append order bozulmaz: dizinin sırası
+  LOGS.forEach(lg=>{
+    const div = document.createElement("div");
+    div.className = "miniItem";
+    div.onclick = ()=> applyLog(lg);
+
+    div.innerHTML = `
+      <div class="l">
+        <div class="sw" style="background:${esc(lg.hex||'#999')}"></div>
+        <div class="info">
+          <b>${esc(lg.colorCode)} • ${esc(lg.boyaTuru)} • ${esc(lg.status)}</b>
+          <small>${esc(lg.when)} • LogID: ${esc(lg.id)}</small>
+        </div>
+      </div>
+      <span class="tag">${esc(lg.kg||'—')} KG</span>
+    `;
+    logEl.appendChild(div);
+  });
+}
+
+function applyRegistered(rec){
+  const ok = confirm("Kayıtlı renk seçildi. Mevcut tablo üzerine yazılacak. Devam?");
+  if(!ok) return;
+
+  // Seçili renge uygula
+  const c = getSelected();
+  c.code = rec.colorCode;
+  c.name = rec.colorName || c.name;
+  c.boya = rec.boyaTuru || c.boya;
+  c.status = "DUZENLENMIS";
+
+  state.kat = num(rec.snapshot?.kat) || 1;
+  state.mixRows = (rec.snapshot?.mixRows || []).map((r,idx)=>({
+    no: r.no || ("NO"+(idx+1)),
+    urun: r.urun||"", marka: r.marka||"", lot: r.lot||"",
+    pct: r.pct ?? "", grkg: r.grkg ?? "",
+    gr1: r.gr1 ?? "", gr2: r.gr2 ?? "", gr3: r.gr3 ?? "", gr4: r.gr4 ?? "",
+    note: r.note||""
+  }));
+
+  setDirty(true);
+  renderRight();
+  renderColorList();
+  saveActiveSnapshot();
+}
+
+function applyLog(lg){
+  const ok = confirm("Log kaydı seçildi. Snapshot geri yüklenecek. Devam?");
+  if(!ok) return;
+
+  const c = getSelected();
+  c.code = lg.colorCode;
+  c.boya = lg.boyaTuru;
+  c.status = "DUZENLENMIS";
+
+  state.kat = num(lg.snapshot?.kat) || 1;
+  state.mixRows = (lg.snapshot?.mixRows || []).map((r,idx)=>({
+    no: r.no || ("NO"+(idx+1)),
+    urun: r.urun||"", marka: r.marka||"", lot: r.lot||"",
+    pct: r.pct ?? "", grkg: r.grkg ?? "",
+    gr1: r.gr1 ?? "", gr2: r.gr2 ?? "", gr3: r.gr3 ?? "", gr4: r.gr4 ?? "",
+    note: r.note||""
+  }));
+
+  setDirty(true);
+  renderRight();
+  renderColorList();
+  saveActiveSnapshot();
+}
+
+function computeKgFromMix(){
+  // Basit KG: %/GR vs yoksa “—”. İstersen sonra net formül bağlarız.
+  return "—";
+}
+
+/* =========================
+   EVENTS (REV-1)
+========================= */
+el('regSearch').addEventListener('input', renderRegistered);
+
+el('kat').addEventListener('input', ()=>{
+  state.kat = Number(el('kat').value)||1;
+  setDirty(true);
+  recomputeTotals();
+  saveActiveSnapshot();
+});
+
+['fName','fCode','fPage'].forEach(id=>{
+  el(id).addEventListener('input', ()=>{
+    const c = getSelected();
+    c.name = el('fName').value;
+    c.code = el('fCode').value;
+    c.page = el('fPage').value;
+    c.status = 'DUZENLENMIS';
+    setDirty(true);
+    renderColorList();
+    renderRight();
+    renderRegistered();
+    saveActiveSnapshot();
+  });
+});
+
+el('fBoya').addEventListener('change', ()=>{
+  const c = getSelected();
+  c.boya = el('fBoya').value;
+  c.status = 'DUZENLENMIS';
+  setDirty(true);
+  renderColorList();
+  renderRight();
+  renderRegistered();
+  saveActiveSnapshot();
+});
+
+el('btnAddColor').addEventListener('click', ()=>{
+  const maxNo = state.colors.reduce((m,x)=>Math.max(m, x.no||0), 0);
+  const nextNo = maxNo + 1;
+  const id = 'c' + Date.now();
+  state.colors.push({id, no:nextNo, code:'', page:'', name:'(Yeni)', boya:el('fBoya')?.value || 'SUBAZLI', status:'DUZENLENMIS'});
+  state.selectedId = id;
+  setDirty(true);
+  renderColorList();
+  renderRight();
+  renderRegistered();
+  saveActiveSnapshot();
+});
+
+el('addRow').addEventListener('click', ()=>{
+  const next = state.mixRows.length + 1;
+  state.mixRows.push({no:'NO'+next, urun:'', marka:'', lot:'', pct:'', grkg:'', gr1:'', gr2:'', gr3:'', gr4:'', note:''});
+  setDirty(true);
+  renderMixTable();
+  recomputeTotals();
+  saveActiveSnapshot();
+});
+
+el('btnPassive').addEventListener('click', ()=>{
+  const c = getSelected();
+  c.status = (c.status==='PASIF') ? 'AKTIF' : 'PASIF';
+  setDirty(true);
+  renderRight();
+  renderColorList();
+  renderRegistered();
+  saveActiveSnapshot();
+});
+
+el('btnSave').addEventListener('click', ()=>{
+  const c = getSelected();
+  if(!c) return;
+
+  // Kaydet → LOG append (eski silinmez)
+  const log = {
+    id: uid(),
+    when: nowTR(),
+    status: "DÜZENLENDİ",
+    colorCode: c.code || "",
+    boyaTuru: c.boya || "",
+    hex: "#999",
+    kg: computeKgFromMix(),
+    snapshot: { kat: state.kat, mixRows: state.mixRows }
+  };
+  LOGS.push(log);
+  saveLogs(LOGS);
+
+  // demo: aktif yap
+  c.status = "AKTIF";
+  setDirty(false);
+  renderRight();
+  renderColorList();
+  renderRegistered();
+  renderLogs();
+  saveActiveSnapshot();
+
+  alert("Kaydedildi (log eklendi).");
+});
+
+el('btnUpdate').addEventListener('click', ()=>alert('Demo: Güncelle'));
+
+try{
+  const d = new Date();
+  el('tarih').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}catch{}
+
+/* =========================
+   BOOT + restore last snapshot
+========================= */
+(function boot(){
+  const snap = loadActiveSnapshot();
+  if(snap){
+    // sadece mix/kat restore (seçili renk id restore etmiyoruz, demo)
+    if(Array.isArray(snap.mixRows)) state.mixRows = snap.mixRows;
+    if(Number.isFinite(Number(snap.kat))) state.kat = Number(snap.kat);
+    el('kat').value = String(state.kat);
+  }
+  renderColorList();
+  renderRight();
+  renderRegistered();
+  renderLogs();
+})();
+</script>
+
+</body>
+</html>
